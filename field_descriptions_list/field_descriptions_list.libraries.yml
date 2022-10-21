@@ -1,0 +1,9 @@
+field_descriptions_list_entities_form:
+  js:
+    js/field_descriptions_list.js: {}
+  css:
+    component:
+      css/field_descriptions_list.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

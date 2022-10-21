@@ -1,0 +1,4 @@
+field_descriptions_list:
+  route_name: field_descriptions_list
+  title: 'Field descriptions list'
+  base_route: entity.field_storage_config.collection

@@ -1,0 +1,8 @@
+name: Field Descriptions List
+type: module
+description: Displays a list of the fields used on the site and their descriptions.
+package: Development
+dependencies:
+  - drupal:field_ui
+core: 8.x
+core_version_requirement: ^8 || ^9
