@@ -1,0 +1,7 @@
+field_descriptions_list:
+  path: '/admin/reports/fields/field-descriptions-list'
+  defaults:
+    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListEntitiesForm'
+    _title: 'Field descriptions list'
+  requirements:
+    _permission: 'administer content types'
