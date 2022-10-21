@@ -1,5 +1,0 @@
-diff.settings:
-  title: 'Field descriptions list'
-  parent: entity.field_storage_config.collection
-  description: 'List field descriptions'
-  route_name: field_descriptions_list
