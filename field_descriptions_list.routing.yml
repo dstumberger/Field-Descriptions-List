@@ -5,3 +5,10 @@ field_descriptions_list:
     _title: 'Field descriptions list'
   requirements:
     _permission: 'administer content types'
+field_descriptions_list_import:
+  path: '/admin/reports/fields/field-descriptions-list-import'
+  defaults:
+    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListImportForm'
+    _title: 'Field descriptions list import'
+  requirements:
+    _permission: 'administer content types'

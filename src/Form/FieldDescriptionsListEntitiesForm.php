@@ -76,20 +76,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Fieldset for optional downloading of CSV file.
-    $form['download'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Download CSV file'),
-      '#attributes' => ['class' => ['fieldset-no-legend']],
-    ];
-    $form['download']['download_csv'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Download CSV file'),
-      '#default_value' => FALSE,
-      '#description' => $this->t("Writes output to file 'field-descriptions-list.csv' in the project root folder."),
-    ];
-
-    // Entities list.
+    // Entities list fieldset, includes Checkall.
     $form['entities_fieldset'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Select entity types'),
@@ -103,6 +90,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
       '#title' => t('Select / Unselect all'),
       '#weight' => -1,
       '#attributes' => ['class' => ['checkall-btn']],
+      '#description' => $this->t("Selects all or none of the entity types below regardless of previous selection."),
     );
     $form['entities_fieldset']['checkall']['#attached']['library'][] = 'field_descriptions_list/field_descriptions_list_entities_form';
 
@@ -111,6 +99,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#attributes' => ['class' => ['entities_fieldset']],
+      '#description' => $this->t("Select which entity types to list. All bundles defined for selected entity types will be included in the list."),
     ];
 
     // Get the complete list of entity types, and add into the checkbox list only if the
@@ -127,6 +116,19 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
         ];
       }
     }
+
+    // Fieldset for optional downloading of CSV file.
+    $form['download'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Download CSV file'),
+      '#attributes' => ['class' => ['fieldset-no-legend']],
+    ];
+    $form['download']['download_csv'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Download CSV file'),
+      '#default_value' => FALSE,
+      '#description' => $this->t("Writes output to file 'field-descriptions-list.csv' in the project root folder."),
+    ];
 
     // The wrapper for Ajax results list.
     $form['field_descriptions_list'] = [
@@ -216,9 +218,10 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
   public function buildHeader() {
     return [
       $this->t('Entity type'),
-      $this->t('Bundle'),
+      $this->t('Bundle machine ID'),
+      $this->t('Bundle label'),
       $this->t('Field machine ID'),
-      $this->t('Field name'),
+      $this->t('Field label'),
       $this->t('Description')
     ];
   }
@@ -246,7 +249,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
           if (!empty($field->getTargetBundle())) {
             $rows[] = [
               'data' => [
-                $entity_type_id, $bundle['label'], $field_name, $field->getLabel(), $field->getDescription(),
+                $entity_type_id, $bundle_id, $bundle['label'], $field_name, $field->getLabel(), $field->getDescription(),
               ],
             ];
           }
