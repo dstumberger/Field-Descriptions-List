@@ -1,0 +1,11 @@
+field_descriptions_list.list.list_form:
+  route_name: field_descriptions_list.field_descriptions_import
+  title: 'Import from CSV file'
+  appears_on:
+    - field_descriptions_list.field_descriptions_list
+field_descriptions_list.list.import_form:
+  route_name: field_descriptions_list.field_descriptions_list
+  title: 'Export to CSV file'
+  appears_on:
+    - field_descriptions_list.field_descriptions_import
+

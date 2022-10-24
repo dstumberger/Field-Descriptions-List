@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Tools and reports for field descriptions.
+ */
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function field_descriptions_list_help($route_name, RouteMatchInterface $route_match) {
+  dsm($route_name, 'field_descriptions_list_help');
+  switch ($route_name) {
+    case 'field_descriptions_list.field_descriptions_import':
+      return '<p>' . t('Import tool for importing field descriptions from a CSV file.') . '</p>';
+
+      case 'field_descriptions_list.field_descriptions_list':
+      return '<p>' . t('List of descriptions (help text) of fields on applicable entity types such as node, paragraph, and media. Import tool for importing field descriptions from a CSV file.') . '</p>';
+  }
+}
