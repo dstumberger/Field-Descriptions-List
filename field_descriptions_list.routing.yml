@@ -1,14 +1,14 @@
-field_descriptions_list.field_descriptions_list:
-  path: '/admin/reports/fields/field-descriptions-list'
+field_descriptions_list.admin_display:
+  path: '/admin/structure/field-descriptions'
   defaults:
     _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListEntitiesForm'
-    _title: 'Field descriptions list'
+    _title: 'Field descriptions'
   requirements:
-    _permission: 'administer content types'
-field_descriptions_list.field_descriptions_import:
+    _permission: 'administer site configuration'
+field_descriptions_list.import:
   path: '/admin/structure/field_descriptions/import'
   defaults:
     _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListImportForm'
-    _title: 'Field descriptions list import'
+    _title: 'Field descriptions import'
   requirements:
-    _permission: 'administer content types'
+    _permission: 'administer site configuration'

@@ -76,26 +76,18 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Entities list fieldset, includes Checkall.
-    $form['entities_fieldset'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Select entity types'),
-      '#prefix' => '<div id="field-descriptions-list-entities">',
-      '#suffix' => '</div>',
-    ];
-
     // Check or uncheck all available entity types, see associated js file in library.
-    $form['entities_fieldset']['checkall'] = array(
+    $form['checkall'] = array(
       '#type' => 'checkbox',
       '#title' => t('Select / Unselect all'),
       '#weight' => -1,
       '#attributes' => ['class' => ['checkall-btn']],
-      '#description' => $this->t("Selects all or none of the entity types below regardless of previous selection."),
+      '#description' => $this->t("Select all or none of the entity types below regardless of previous selection."),
     );
-    $form['entities_fieldset']['checkall']['#attached']['library'][] = 'field_descriptions_list/field_descriptions_list_entities_form';
+    $form['checkall']['#attached']['library'][] = 'field_descriptions_list/field_descriptions_list_entities_form';
 
     // Entities list.
-    $form['entities_fieldset']['entities'] = [
+    $form['entities'] = [
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#attributes' => ['class' => ['entities_fieldset']],
@@ -106,7 +98,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
     // entity is fieldable.
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
       if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
-        $form['entities_fieldset']['entities'][$entity_type_id] = [
+        $form['entities'][$entity_type_id] = [
           '#type' => 'checkbox',
           '#title' => $entity_type_id,
           '#default_value' => FALSE,
@@ -120,14 +112,14 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
     // Fieldset for optional downloading of CSV file.
     $form['download'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Download CSV file'),
+      '#title' => $this->t('Export'),
       '#attributes' => ['class' => ['fieldset-no-legend']],
     ];
     $form['download']['download_csv'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Download CSV file'),
+      '#title' => $this->t('Export to CSV file'),
       '#default_value' => FALSE,
-      '#description' => $this->t("Writes output to file 'field-descriptions-list.csv' in the project root folder."),
+      '#description' => $this->t("Write output to file 'field-descriptions-list.csv' in the project root folder."),
     ];
 
     // The wrapper for Ajax results list.

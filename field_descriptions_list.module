@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Tools and reports for field descriptions.
+ * Reports and tools for field descriptions.
  */
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -11,10 +11,11 @@ use Drupal\Core\Routing\RouteMatchInterface;
  */
 function field_descriptions_list_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'field_descriptions_list.field_descriptions_import':
-      return '<p>' . t('Import tool for importing field descriptions from a CSV file.') . '</p>';
-
-      case 'field_descriptions_list.field_descriptions_list':
-      return '<p>' . t('List of descriptions (help text) of fields on applicable entity types such as node, paragraph, and media. Import tool for importing field descriptions from a CSV file.') . '</p>';
+    case 'field_descriptions_list.admin_display':
+      $output = '<p>' . t('List of descriptions (help text) of fields on applicable entity types such as node, paragraph, and media. Import tool for importing field descriptions from a CSV file.') . '</p>';
+      return $output;
+    case 'field_descriptions_list.import':
+      $output = '<p>' . t('Import tool for importing field descriptions from a CSV file.') . '</p>';
+      return $output;
   }
 }

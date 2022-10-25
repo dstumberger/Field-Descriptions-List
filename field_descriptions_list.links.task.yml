@@ -1,4 +1,8 @@
-field_descriptions_list:
-  route_name: field_descriptions_list.field_descriptions_list
-  title: 'Field descriptions list'
-  base_route: entity.field_storage_config.collection
+field_descriptions_list.import:
+  route_name: field_descriptions_list.import
+  title: 'Import'
+  base_route: field_descriptions_list.admin_display
+field_descriptions_list.admin_display:
+  title: 'List/Export to CSV'
+  route_name: field_descriptions_list.admin_display
+  base_route: field_descriptions_list.admin_display

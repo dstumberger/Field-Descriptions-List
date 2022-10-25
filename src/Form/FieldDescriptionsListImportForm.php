@@ -7,6 +7,7 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\field\Entity\FieldConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class FieldDescriptionsListImportForm extends FormBase {
@@ -82,12 +83,39 @@ class FieldDescriptionsListImportForm extends FormBase {
     $fid = $form_state->getValue('import_file')[0];
 
     if ($fid !== NULL) {
-      // Ensure file doesn't get wiped out by cron.
+      // Get the CSV file, mark as temporary.
       $file = $this->getCsvEntity($fid);
       $file->isTemporary();
       $file->save();
 
-      $parsed = $this->getCsvById($fid);
+      // The keys we need to find the field.
+      $keys = ['Entity type', 'Bundle machine ID', 'Field machine ID', 'Description'];
+
+      // Retrieve an array of records.
+      $records = $this->getCsvRecords($fid);
+
+      // Peek at the first record and confirm it has the keys we need.
+      if ($first = reset($records)) {
+        if (count(array_intersect($keys, array_keys($first))) <> count($keys)) {
+          return;
+        }
+      }
+
+      /* @var array $record */
+      foreach ($records as $record) {
+        if (!$record['Description']) {
+          continue;
+        }
+
+        /* @var \Drupal\field\FieldConfigInterface $field */
+        $field = FieldConfig::loadByName($record['Entity type'], $record['Bundle machine ID'], $record['Field machine ID']);
+
+        // If we found a field, set the description and save the field configuration in database.
+        if ($field) {
+          $field->setDescription($record['Description']);
+          $field->save();
+        }
+      }
     }
   }
 
@@ -101,19 +129,24 @@ class FieldDescriptionsListImportForm extends FormBase {
    * @return array
    *   The parsed CSV
    */
-  public function getCsvById(int $id, $skip_header = TRUE) {
+  public function getCsvRecords(int $id, bool $skip_header = TRUE) {
     /* @var \Drupal\file\Entity\File $entity */
     $entity = $this->getCsvEntity($id);
     $return = [];
 
     if (($csv = fopen($entity->uri->getString(), 'r')) !== FALSE) {
+      $header_keys = [];
       while (($row = fgetcsv($csv, 0, ',')) !== FALSE) {
         // Skip header row.
         if ($skip_header) {
+          // Set the header row as the keys to the associative array of records.
+          $header_keys = $row;
           $skip_header = FALSE;
           continue;
         }
-        $return[] = $row;
+
+        // Combine the row of data with the header keys.
+        $return[] = array_combine($header_keys, $row);
       }
       fclose($csv);
     }
