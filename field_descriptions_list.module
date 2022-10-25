@@ -10,7 +10,6 @@ use Drupal\Core\Routing\RouteMatchInterface;
  * Implements hook_help().
  */
 function field_descriptions_list_help($route_name, RouteMatchInterface $route_match) {
-  dsm($route_name, 'field_descriptions_list_help');
   switch ($route_name) {
     case 'field_descriptions_list.field_descriptions_import':
       return '<p>' . t('Import tool for importing field descriptions from a CSV file.') . '</p>';
