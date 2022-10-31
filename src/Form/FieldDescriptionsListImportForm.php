@@ -165,6 +165,10 @@ class FieldDescriptionsListImportForm extends FormBase {
     if ($form_state->getTriggeringElement()['#name'] == 'file_upload_button') {
       $this->file = _file_save_upload_from_form($form['import_file']['file'], $form_state, 0);
 
+      // Get the CSV file, mark as temporary.
+      $this->file->isTemporary();
+      $this->file->save();
+
       // Ensure we have the file uploaded.
       if (!$this->file) {
         $form_state->setErrorByName('file', $this->t('File to import not found.'));
@@ -172,7 +176,10 @@ class FieldDescriptionsListImportForm extends FormBase {
     }
 
     if ($form_state->getTriggeringElement()['#name'] == 'op') {
-      ;
+      // Ensure we have the file uploaded.
+      if (!$this->file) {
+        $form_state->setErrorByName('file', $this->t('No file specified.'));
+      }
     }
   }
 
@@ -193,14 +200,10 @@ class FieldDescriptionsListImportForm extends FormBase {
   public function processCSVImport(FormStateInterface $form_state) {
     $processed = $modified = $added = $deleted = 0;
 
-    // Get the CSV file, mark as temporary.
-    $this->file->isTemporary();
-    $this->file->save();
-
     // The keys we need to find the field.
     $keys = ['Entity type', 'Bundle machine ID', 'Field machine ID', 'Description'];
 
-    // Retrieve an array of records.
+    // Retrieve an array of records from the file.
     $records = $this->getCsvRecords();
 
     // Peek at the first record and confirm it has the keys we need.
@@ -256,22 +259,23 @@ class FieldDescriptionsListImportForm extends FormBase {
   /**
    * Parses a uploaded CSV file given a file ID.
    *
-   * @param bool $skip_header
+   * @param bool $header_row
    *
    * @return array
-   *   The parsed CSV
+   *   The parsed CSV as an associative array. The keys of the array are the header columns.
    */
-  public function getCsvRecords(bool $skip_header = TRUE) {
+  public function getCsvRecords(bool $header_row = TRUE) {
     $return = [];
 
     if (($csv = fopen($this->file->uri->getString(), 'r')) !== FALSE) {
       $header_keys = [];
+
       while (($row = fgetcsv($csv, 0, ',')) !== FALSE) {
         // Skip header row.
-        if ($skip_header) {
+        if ($header_row) {
           // Set the header row as the keys to the associative array of records.
           $header_keys = $row;
-          $skip_header = FALSE;
+          $header_row = FALSE;
           continue;
         }
 
@@ -282,27 +286,6 @@ class FieldDescriptionsListImportForm extends FormBase {
     }
 
     return $return;
-  }
-
-  /**
-   * Returns a file entity by ID.
-   *
-   * @param int $id
-   *   The File ID.
-   *
-   * @return EntityInterface|null
-   *   The uploaded CSV file.
-   *
-   * @throws InvalidPluginDefinitionException
-   * @throws PluginNotFoundException
-   */
-  public function getCsvEntity(int $id) {
-    if ($id) {
-      return $this->entityTypeManager->getStorage('file')->load($id);
-    }
-    else {
-      return NULL;
-    }
   }
 
 }
