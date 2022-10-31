@@ -14,6 +14,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class FieldDescriptionsListImportForm extends FormBase {
 
   /**
+   * Uploaded file entity.
+   *
+   * @var \Drupal\file\Entity\File
+   */
+  protected $file;
+
+  /**
    * The Entity type manager service.
    *
    * @var EntityTypeManagerInterface $entityTypeManager
@@ -60,13 +67,19 @@ class FieldDescriptionsListImportForm extends FormBase {
     $caption .= "<p>Note that all changes are made 'in database' and must be exported as configuration changes for software control.";
     $form['description'] = ['#markup' => $caption];
 
+    // Fieldset for optional downloading of CSV file.
     $form['import_file'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Import file'),
+      '#attributes' => ['class' => ['fieldset-no-legend']],
+    ];
+
+    $form['import_file']['file'] = [
       '#type' => 'managed_file',
       '#name' => 'csv_import_file',
-      '#title' => t('File'),
       '#multiple' => FALSE,
       '#size' => 50,
-      '#description' => $this->t('CSV format only.'),
+      '#description' => t('Allowed file types: @extensions.', ['@extensions' => '.csv']),
       '#default_value' => NULL,
       '#upload_validators' => $validators,
       '#upload_location' => 'public://',
@@ -88,95 +101,170 @@ class FieldDescriptionsListImportForm extends FormBase {
       '#markup' => '',
     ];
 
+    // The triggering element is the button that triggered the form submit. This
+    // will be empty on initial page load, as the form has not been submitted
+    // yet. The code inside the conditional is only executed when a
+    // value has been submitted, and there are results to be rendered.
+    if ($form_state->getTriggeringElement()) {
+      $import_summary = $this->processCSVImport($form_state);
+
+      if (empty($import_summary)) {
+        $markup = $this->t("Error processing file");
+      }
+      else {
+        $markup = $this->t("Processed: @processed, Added: @added, Modified: @modified, Deleted: @deleted", [
+          '@processed' => $import_summary['processed'],
+          '@added' => $import_summary['added'],
+          '@modified' => $import_summary['modified'],
+          '@deleted' => $import_summary['deleted'],
+        ]);
+      }
+
+      // Form element that displays the result list.
+      $form['import_summary']['result'] = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $markup . '</p>',
+      ];
+    }
+
     $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = [
+
+    // The submit button.
+    $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Import'),
+      '#ajax' => [
+        'callback' => '::ajaxSubmit',
+        // The ID of the <div/> into which search results should be inserted.
+        'wrapper' => 'field_descriptions_list_import_summary_wrapper',
+      ],
     ];
 
     return $form;
   }
 
   /**
-   * {@inheritDoc}
+   * Custom ajax submit handler for the form. Returns search results.
+   *
+   * @param array $form
+   *   The form itself.
+   * @param FormStateInterface $form_state
+   *
+   * @return array
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $fid = $form_state->getValue('import_file')[0];
+  public function ajaxSubmit(array &$form, FormStateInterface $form_state) {
+    // Return the search results element of the form.
+    return $form['import_summary'];
+  }
 
-    if ($fid !== NULL) {
-      // Get the CSV file, mark as temporary.
-      $file = $this->getCsvEntity($fid);
-      $file->isTemporary();
-      $file->save();
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Only validate the file exists when the file upload button is pressed.
+    if ($form_state->getTriggeringElement()['#name'] == 'file_upload_button') {
+      $this->file = _file_save_upload_from_form($form['import_file']['file'], $form_state, 0);
 
-      // The keys we need to find the field.
-      $keys = ['Entity type', 'Bundle machine ID', 'Field machine ID', 'Description'];
-
-      // Retrieve an array of records.
-      $records = $this->getCsvRecords($fid);
-
-      // Peek at the first record and confirm it has the keys we need.
-      if ($first = reset($records)) {
-        if (count(array_intersect($keys, array_keys($first))) <> count($keys)) {
-          return;
-        }
-      }
-
-      $processed = $modified = $added = $deleted = 0;
-
-      /* @var array $record */
-      foreach ($records as $record) {
-        $processed++;
-
-        /* @var \Drupal\field\FieldConfigInterface $field */
-        $field = FieldConfig::loadByName($record['Entity type'], $record['Bundle machine ID'], $record['Field machine ID']);
-
-        // If we found a field, set the description and save the field configuration in database.
-        if ($field) {
-          $existing = $field->getDescription();
-          $new = $record['Description'];
-
-          if (empty($existing) && empty($new)) {
-            continue;
-          }
-          elseif (empty($existing) && !empty($new)) {
-            $added++;
-          }
-          elseif (!empty($existing) && empty($new)) {
-            $deleted++;
-          }
-          elseif (!empty($existing) && !empty($new)) {
-            if (strcmp($existing, $new) == 0) {
-              continue;
-            }
-            else {
-              $modified++;
-            }
-          }
-
-          $field->setDescription($new);
-          $field->save();
-        }
+      // Ensure we have the file uploaded.
+      if (!$this->file) {
+        $form_state->setErrorByName('file', $this->t('File to import not found.'));
       }
     }
+
+    if ($form_state->getTriggeringElement()['#name'] == 'op') {
+      ;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Set the form to rebuild. The submitted values are maintained in the
+    // form state, and used to build the search results in the form definition.
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Processes the rows in the CSV import file.
+   *
+   * @param FormStateInterface $form_state
+   */
+  public function processCSVImport(FormStateInterface $form_state) {
+    $processed = $modified = $added = $deleted = 0;
+
+    // Get the CSV file, mark as temporary.
+    $this->file->isTemporary();
+    $this->file->save();
+
+    // The keys we need to find the field.
+    $keys = ['Entity type', 'Bundle machine ID', 'Field machine ID', 'Description'];
+
+    // Retrieve an array of records.
+    $records = $this->getCsvRecords();
+
+    // Peek at the first record and confirm it has the keys we need.
+    if ($first = reset($records)) {
+      if (count(array_intersect($keys, array_keys($first))) <> count($keys)) {
+        return [];
+      }
+    }
+
+    /* @var array $record */
+    foreach ($records as $record) {
+      $processed++;
+
+      /* @var \Drupal\field\FieldConfigInterface $field */
+      $field = FieldConfig::loadByName($record['Entity type'], $record['Bundle machine ID'], $record['Field machine ID']);
+
+      // If we found a field, set the description and save the field configuration in database.
+      if ($field) {
+        $existing = $field->getDescription();
+        $new = $record['Description'];
+
+        if (empty($existing) && empty($new)) {
+          continue;
+        }
+        elseif (empty($existing) && !empty($new)) {
+          $added++;
+        }
+        elseif (!empty($existing) && empty($new)) {
+          $deleted++;
+        }
+        elseif (!empty($existing) && !empty($new)) {
+          if (strcmp($existing, $new) == 0) {
+            continue;
+          }
+          else {
+            $modified++;
+          }
+        }
+
+        $field->setDescription($new);
+        $field->save();
+      }
+    }
+
+    return [
+      'processed' => $processed,
+      'added' => $added,
+      'modified' => $modified,
+      'deleted' => $deleted,
+    ];
   }
 
   /**
    * Parses a uploaded CSV file given a file ID.
    *
-   * @param int $id
-   *   The file ID
    * @param bool $skip_header
    *
    * @return array
    *   The parsed CSV
    */
-  public function getCsvRecords(int $id, bool $skip_header = TRUE) {
-    /* @var \Drupal\file\Entity\File $entity */
-    $entity = $this->getCsvEntity($id);
+  public function getCsvRecords(bool $skip_header = TRUE) {
     $return = [];
 
-    if (($csv = fopen($entity->uri->getString(), 'r')) !== FALSE) {
+    if (($csv = fopen($this->file->uri->getString(), 'r')) !== FALSE) {
       $header_keys = [];
       while (($row = fgetcsv($csv, 0, ',')) !== FALSE) {
         // Skip header row.

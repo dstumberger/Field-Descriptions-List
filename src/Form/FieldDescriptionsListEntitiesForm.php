@@ -188,7 +188,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
    * @return array
    */
   public function ajaxSubmit(array &$form, FormStateInterface $form_state) {
-    // Return the search results element of the form.
+    // Return the results list element of the form.
     return $form['field_descriptions_list'];
   }
 
