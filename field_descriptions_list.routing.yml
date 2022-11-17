@@ -12,3 +12,10 @@ field_descriptions_list.import:
     _title: 'Field descriptions import'
   requirements:
     _permission: 'administer site configuration'
+field_descriptions_list.admin_display_types:
+  path: '/admin/structure/field-descriptions/types'
+  defaults:
+    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListEntityTypesForm'
+    _title: 'Entity type and bundle descriptions'
+  requirements:
+    _permission: 'administer site configuration'

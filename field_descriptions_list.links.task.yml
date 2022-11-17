@@ -1,8 +1,12 @@
-field_descriptions_list.import:
-  route_name: field_descriptions_list.import
-  title: 'Import'
-  base_route: field_descriptions_list.admin_display
 field_descriptions_list.admin_display:
   title: 'List/Export to CSV'
   route_name: field_descriptions_list.admin_display
+  base_route: field_descriptions_list.admin_display
+field_descriptions_list.import:
+  title: 'Import'
+  route_name: field_descriptions_list.import
+  base_route: field_descriptions_list.admin_display
+field_descriptions_list.admin_display_types:
+  title: 'Entity types & bundles'
+  route_name: field_descriptions_list.admin_display_types
   base_route: field_descriptions_list.admin_display
