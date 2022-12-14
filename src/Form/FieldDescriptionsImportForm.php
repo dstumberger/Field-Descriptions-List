@@ -102,7 +102,7 @@ class FieldDescriptionsImportForm extends FormBase {
     // will be empty on initial page load, as the form has not been submitted
     // yet. The code inside the conditional is only executed when a
     // value has been submitted, and there are results to be rendered.
-    if ($form_state->getTriggeringElement()) {
+    if ($form_state->getTriggeringElement()['#name'] == 'op') {
       $import_summary = $this->processCSVImport($form_state);
 
       if (empty($import_summary)) {
@@ -226,16 +226,19 @@ class FieldDescriptionsImportForm extends FormBase {
           continue;
         }
         elseif (empty($existing) && !empty($new)) {
+          dsm('addition');
           $added++;
         }
         elseif (!empty($existing) && empty($new)) {
+          dsm('deletion');
           $deleted++;
         }
-        elseif (!empty($existing) && !empty($new)) {
+        else {
           if (strcmp($existing, $new) == 0) {
             continue;
           }
           else {
+            dsm('modification');
             $modified++;
           }
         }
