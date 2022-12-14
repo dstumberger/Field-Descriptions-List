@@ -5,15 +5,14 @@ namespace Drupal\field_descriptions_list\Form;
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Displays the entities description list form.
+ * Displays the entities_descriptions_list form.
  */
-class EntitiesDescriptionsListForm extends FormBase {
+class EntityDescriptionsListForm extends FormBase {
 
   /**
    * The entity type manager.
@@ -74,6 +73,7 @@ class EntitiesDescriptionsListForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Check or uncheck all available entity types, see associated js file in library.
@@ -91,22 +91,43 @@ class EntitiesDescriptionsListForm extends FormBase {
       '#type' => 'fieldset',
       '#tree' => TRUE,
       '#attributes' => ['class' => ['entities_fieldset']],
-      '#description' => $this->t("Select which entity types to list. All bundles defined for selected entity types will be included in the list."),
+      '#description' => $this->t("Select which entity types to list."),
     ];
 
-    // Get the complete list of entity types, and add into the checkbox list only if the
-    // entity is fieldable.
-    foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
-      if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
-        $form['entities'][$entity_type_id] = [
-          '#type' => 'checkbox',
-          '#title' => $entity_type_id,
-          '#default_value' => FALSE,
-          '#attributes' => [
-            'class' => ['field-descriptions-list-entity-type']
-          ]
-        ];
+    $entity_types = [
+      'node_type' => 'Node type (Content type)',
+      'media_type' => 'Media type',
+      'comment_type' => 'Comment type',
+      'taxonomy_vocabulary' => 'Vocabulary',
+      'paragraphs_type' => 'Paragraph type',
+      'webform' => 'Webform',
+      'block_content_type' => 'Block content type',
+      'menu' => 'Menu'
+    ];
+
+    foreach($entity_types as $entity_type => $entity_type_label) {
+      /* @var Drupal\Core\Config\Entity\ConfigEntityType $bundle_entity_type */
+      if ($bundle_entity_type = $this->entityTypeManager->getDefinition($entity_type)) {
+        $original_class = $bundle_entity_type->getOriginalClass();
+
+        if (!method_exists($original_class, "getDescription")) {
+          unset($entity_types[$entity_type]);
+        }
       }
+      else {
+        unset($entity_types[$entity_type]);
+      }
+    }
+
+    foreach ($entity_types as $entity_type => $entity_type_label) {
+      $form['entities'][$entity_type] = [
+        '#type' => 'checkbox',
+        '#title' => $entity_type_label,
+        '#default_value' => FALSE,
+        '#attributes' => [
+          'class' => ['field-descriptions-list-entity-type']
+        ]
+      ];
     }
 
     // Fieldset for optional downloading of CSV file.
@@ -119,7 +140,7 @@ class EntitiesDescriptionsListForm extends FormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Export to CSV file'),
       '#default_value' => FALSE,
-      '#description' => $this->t("Write output to file 'field-descriptions.csv' in the project root folder."),
+      '#description' => $this->t("Write output to file 'entity-type-descriptions.csv' in the project root folder."),
     ];
 
     // The wrapper for Ajax results list.
@@ -128,7 +149,7 @@ class EntitiesDescriptionsListForm extends FormBase {
       '#weight' => 100,
       // The prefix/suffix are the div with the ID specified as the wrapper in
       // the submit button's #ajax definition.
-      '#prefix' => '<div id="set_field_descriptions_list_results_wrapper">',
+      '#prefix' => '<div id="set_entity_descriptions_list_results_wrapper">',
       '#suffix' => '</div>',
       // The #markup element forces rendering of the #prefix and #suffix.
       // Without content, the wrappers are not rendered. Therefore, an empty
@@ -144,6 +165,19 @@ class EntitiesDescriptionsListForm extends FormBase {
     if ($form_state->getTriggeringElement()) {
       // Get the selected list of entity type IDs.
       $entities = array_keys(array_filter($form_state->getValue('entities')));
+
+      // Saved for later write.
+//    $event = $types['event'];
+//    $event->set("description", "THis is a new description");
+//    $event->save();
+//
+//    $entity_types = $this->entityTypeManager->getDefinitions();
+//    $entity_type = $this->entityTypeManager->getDefinition('node');
+//
+//    $bundles = $this->entityTypeBundleInfo->getBundleInfo('node');
+//    foreach($bundles as $bundle_id => $bundle) {
+//      break;
+//    }
 
       // Build the table header and rows.
       $header = $this->buildHeader();
@@ -171,7 +205,7 @@ class EntitiesDescriptionsListForm extends FormBase {
       '#ajax' => [
         'callback' => '::ajaxSubmit',
         // The ID of the <div/> into which search results should be inserted.
-        'wrapper' => 'set_field_descriptions_list_results_wrapper',
+        'wrapper' => 'set_entity_descriptions_list_results_wrapper',
       ],
     ];
 
@@ -212,8 +246,6 @@ class EntitiesDescriptionsListForm extends FormBase {
       $this->t('Entity type'),
       $this->t('Bundle machine ID'),
       $this->t('Bundle label'),
-      $this->t('Field machine ID'),
-      $this->t('Field label'),
       $this->t('Description')
     ];
   }
@@ -222,30 +254,26 @@ class EntitiesDescriptionsListForm extends FormBase {
    * Lists all instances of fields on every fieldable entity.
    *
    * @param array $entity_types
-   *   The array of entity type IDs to list field descriptions for.
+   *   The array of entity type IDs to list bundle descriptions for, such as "node_type".
    *
    * @return array
-   *   The array for the rows of field descriptions.
+   *   The array for the rows of descriptions, intended to be rendered as table rows.
    */
   public function buildRows(array $entity_types): array {
     $rows = [];
 
-    foreach ($entity_types as $entity_type_id) {
-      // Get the bundles defined for the entity type.
-      $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
+    // The entity types are selected by the user via the form.
+    foreach($entity_types as $entity_type) {
+      /* @var \Drupal\Core\Entity\EntityTypeInterface $definition */
+      $definition = $this->entityTypeManager->getDefinition($entity_type);
 
-      foreach ($bundles as $bundle_id => $bundle) {
-        $fields = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle_id);
-
-        foreach ($fields as $field_name => $field) {
-          if (!empty($field->getTargetBundle())) {
-            $rows[] = [
-              'data' => [
-                $entity_type_id, $bundle_id, $bundle['label'], $field_name, $field->getLabel(), $field->getDescription(),
-              ],
-            ];
-          }
-        }
+      $bundles = $this->entityTypeManager->getStorage($entity_type)->loadMultiple();
+      foreach ($bundles as $bundle) {
+        $rows[] = [
+          'data' => [
+            $definition->getLabel()->render(), $bundle->id(), $bundle->label(), $bundle->getDescription(),
+          ],
+        ];
       }
     }
 
@@ -262,7 +290,7 @@ class EntitiesDescriptionsListForm extends FormBase {
    */
   private function downloadDataCSV(array $header, array $rows) {
     // Output into a csv file
-    $fname = 'field-descriptions.csv';
+    $fname = 'entity-type-descriptions.csv';
     $csv_file = fopen($fname, 'w') or die($this->t("CSV file '%fname' not be opened", ['%fname' => $fname]));
 
     // Write the header.

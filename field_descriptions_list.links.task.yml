@@ -3,7 +3,7 @@ field_descriptions_list.admin_display:
   route_name: field_descriptions_list.admin_display
   base_route: field_descriptions_list.admin_display
 field_descriptions_list.import:
-  title: 'Import'
+  title: 'Import field descriptions'
   route_name: field_descriptions_list.import
   base_route: field_descriptions_list.admin_display
 field_descriptions_list.admin_display_types:

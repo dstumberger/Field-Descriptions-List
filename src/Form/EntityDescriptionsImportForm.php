@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class FieldDescriptionsListImportForm extends FormBase {
+class EntityDescriptionsImportForm extends FormBase {
 
   /**
    * Uploaded file entity.
@@ -28,7 +28,7 @@ class FieldDescriptionsListImportForm extends FormBase {
   protected $entityTypeManager;
 
   /**
-   * FieldDescriptionsListImportForm constructor.
+   * FieldDescriptionsImportForm constructor.
    *
    * @param EntityTypeManagerInterface $entity_type_manager
    */
@@ -62,7 +62,7 @@ class FieldDescriptionsListImportForm extends FormBase {
       'file_validate_extensions' => ['csv'],
     );
 
-    $caption = '<p>' . $this->t("Add, delete, or update entity field descriptions from a CSV file. File must have a header row with the the following columns:") . '</p>';
+    $caption = '<p>' . $this->t("Add, delete, or update entity field descriptions from a CSV file. File must have a header row with <em>at least</em> the following columns:") . '</p>';
     $caption .= '<ul><li>"Entity type"</li><li>"Bundle machine ID"</li><li>"Field machine ID"</li><li>"Description"</li></ul>';
     $caption .= "<p>Note that all changes are made 'in database' and must be exported as configuration changes for software control.";
     $form['description'] = ['#markup' => $caption];
