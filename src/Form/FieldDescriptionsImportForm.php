@@ -226,11 +226,9 @@ class FieldDescriptionsImportForm extends FormBase {
           continue;
         }
         elseif (empty($existing) && !empty($new)) {
-          dsm('addition');
           $added++;
         }
         elseif (!empty($existing) && empty($new)) {
-          dsm('deletion');
           $deleted++;
         }
         else {
@@ -238,7 +236,6 @@ class FieldDescriptionsImportForm extends FormBase {
             continue;
           }
           else {
-            dsm('modification');
             $modified++;
           }
         }
