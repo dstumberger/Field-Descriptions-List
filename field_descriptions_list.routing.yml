@@ -1,7 +1,7 @@
 field_descriptions_list.admin_display:
   path: '/admin/structure/field-descriptions'
   defaults:
-    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListEntitiesForm'
+    _form: '\Drupal\field_descriptions_list\Form\EntitiesDescriptionsListForm'
     _title: 'Field descriptions'
   requirements:
     _permission: 'administer site configuration'
@@ -9,13 +9,13 @@ field_descriptions_list.import:
   path: '/admin/structure/field_descriptions/import'
   defaults:
     _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListImportForm'
-    _title: 'Field descriptions import'
+    _title: 'Descriptions import'
   requirements:
     _permission: 'administer site configuration'
 field_descriptions_list.admin_display_types:
   path: '/admin/structure/field-descriptions/types'
   defaults:
     _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListEntityTypesForm'
-    _title: 'Entity type and bundle descriptions'
+    _title: 'Entity type bundle descriptions'
   requirements:
     _permission: 'administer site configuration'

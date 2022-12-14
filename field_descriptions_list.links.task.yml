@@ -1,5 +1,5 @@
 field_descriptions_list.admin_display:
-  title: 'List/Export to CSV'
+  title: 'Field Descriptions'
   route_name: field_descriptions_list.admin_display
   base_route: field_descriptions_list.admin_display
 field_descriptions_list.import:

@@ -11,9 +11,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Displays the field_descriptions_list_entities form.
+ * Displays the entities description list form.
  */
-class FieldDescriptionsListEntitiesForm extends FormBase {
+class EntitiesDescriptionsListForm extends FormBase {
 
   /**
    * The entity type manager.
@@ -119,7 +119,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Export to CSV file'),
       '#default_value' => FALSE,
-      '#description' => $this->t("Write output to file 'field-descriptions-list.csv' in the project root folder."),
+      '#description' => $this->t("Write output to file 'field-descriptions.csv' in the project root folder."),
     ];
 
     // The wrapper for Ajax results list.
@@ -262,7 +262,7 @@ class FieldDescriptionsListEntitiesForm extends FormBase {
    */
   private function downloadDataCSV(array $header, array $rows) {
     // Output into a csv file
-    $fname = 'field-descriptions-list.csv';
+    $fname = 'field-descriptions.csv';
     $csv_file = fopen($fname, 'w') or die($this->t("CSV file '%fname' not be opened", ['%fname' => $fname]));
 
     // Write the header.
