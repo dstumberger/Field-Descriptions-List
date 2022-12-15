@@ -1,5 +1,0 @@
-field_descriptions_list.list.list_form:
-  route_name: field_descriptions_list.import
-  title: 'Import from CSV file'
-  appears_on:
-    - field_descriptions_list.admin_display

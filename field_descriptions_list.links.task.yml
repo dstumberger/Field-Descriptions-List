@@ -1,12 +1,30 @@
 field_descriptions_list.admin_display:
-  title: 'Field Descriptions'
   route_name: field_descriptions_list.admin_display
+  title: 'Field descriptions'
   base_route: field_descriptions_list.admin_display
-field_descriptions_list.import:
-  title: 'Import field descriptions'
+
+field_descriptions_list.admin_display.list:
+  route_name: field_descriptions_list.admin_display
+  title: 'List'
+  parent_id: field_descriptions_list.admin_display
+
+field_descriptions_list.admin_display.import:
   route_name: field_descriptions_list.import
-  base_route: field_descriptions_list.admin_display
+  title: 'Import'
+  parent_id: field_descriptions_list.admin_display
+
 field_descriptions_list.admin_display_types:
-  title: 'Entity types & bundles'
+  title: 'Entity type descriptions'
   route_name: field_descriptions_list.admin_display_types
   base_route: field_descriptions_list.admin_display
+
+field_descriptions_list.admin_display_types.list:
+  title: 'List'
+  route_name: field_descriptions_list.admin_display_types
+  parent_id: field_descriptions_list.admin_display_types
+
+field_descriptions_list.import_entities:
+  title: 'Import'
+  route_name: field_descriptions_list.import
+  parent_id: field_descriptions_list.admin_display_types
+
