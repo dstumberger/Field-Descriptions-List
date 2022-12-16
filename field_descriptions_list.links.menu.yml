@@ -1,5 +1,5 @@
-field_descriptions_list.admin_display:
+field_descriptions.list:
   title: 'Entity and field descriptions'
   parent: system.admin_reports
   description: 'List, export, and import field descriptions.'
-  route_name: field_descriptions_list.admin_display
+  route_name: field_descriptions.list

@@ -11,10 +11,10 @@ use Drupal\Core\Routing\RouteMatchInterface;
  */
 function field_descriptions_list_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'field_descriptions_list.admin_display':
+    case 'field_descriptions.list':
       $output = '<p>' . t('List of descriptions (help text) of fields on applicable entity types such as node, paragraph, and media. Import tool for importing field descriptions from a CSV file.') . '</p>';
       return $output;
-    case 'field_descriptions_list.import':
+    case 'field_descriptions.import':
       $output = '<p>' . t('Import tool for importing field descriptions from a CSV file.') . '</p>';
       return $output;
   }
