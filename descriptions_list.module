@@ -9,7 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 /**
  * Implements hook_help().
  */
-function field_descriptions_list_help($route_name, RouteMatchInterface $route_match) {
+function descriptions_list_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'field_descriptions.list':
       $output = '<p>' . t('List of descriptions (help text) of fields on applicable entity types such as node, paragraph, and media. Import tool for importing field descriptions from a CSV file.') . '</p>';

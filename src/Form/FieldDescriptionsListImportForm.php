@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\field_descriptions_list\Form;
+namespace Drupal\descriptions_list\Form;
 
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
@@ -49,7 +49,7 @@ class FieldDescriptionsListImportForm extends FormBase {
    * {@inheritDoc}
    */
   public function getFormId() {
-    return 'field_descriptions_list_import_form';
+    return 'descriptions_list_import_form';
   }
 
   /**
@@ -92,7 +92,7 @@ class FieldDescriptionsListImportForm extends FormBase {
       '#weight' => 100,
       // The prefix/suffix are the div with the ID specified as the wrapper in
       // the submit button's #ajax definition.
-      '#prefix' => '<div id="field_descriptions_list_import_summary_wrapper">',
+      '#prefix' => '<div id="descriptions_list_import_summary_wrapper">',
       '#suffix' => '</div>',
       // The #markup element forces rendering of the #prefix and #suffix.
       // Without content, the wrappers are not rendered. Therefore, an empty
@@ -136,7 +136,7 @@ class FieldDescriptionsListImportForm extends FormBase {
       '#ajax' => [
         'callback' => '::ajaxSubmit',
         // The ID of the <div/> into which search results should be inserted.
-        'wrapper' => 'field_descriptions_list_import_summary_wrapper',
+        'wrapper' => 'descriptions_list_import_summary_wrapper',
       ],
     ];
 

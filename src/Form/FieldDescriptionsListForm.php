@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\field_descriptions_list\Form;
+namespace Drupal\descriptions_list\Form;
 
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
@@ -69,7 +69,7 @@ class FieldDescriptionsListForm extends FormBase {
    * Implements \Drupal\Core\Form\FormInterface::getFormID().
    */
   public function getFormId() {
-    return 'field_descriptions_list_entities_form';
+    return 'descriptions_list_entities_form';
   }
 
   /**
@@ -84,7 +84,7 @@ class FieldDescriptionsListForm extends FormBase {
       '#attributes' => ['class' => ['checkall-btn']],
       '#description' => $this->t("Select all or none of the entity types below regardless of previous selection."),
     );
-    $form['checkall']['#attached']['library'][] = 'field_descriptions_list/field_descriptions_list_entities_form';
+    $form['checkall']['#attached']['library'][] = 'descriptions_list/descriptions_list_entities_form';
 
     // Entities list.
     $form['entities'] = [
@@ -123,12 +123,12 @@ class FieldDescriptionsListForm extends FormBase {
     ];
 
     // The wrapper for Ajax results list.
-    $form['field_descriptions_list'] = [
+    $form['descriptions_list'] = [
       // Set the results to be below the form.
       '#weight' => 100,
       // The prefix/suffix are the div with the ID specified as the wrapper in
       // the submit button's #ajax definition.
-      '#prefix' => '<div id="set_field_descriptions_list_results_wrapper">',
+      '#prefix' => '<div id="set_descriptions_list_results_wrapper">',
       '#suffix' => '</div>',
       // The #markup element forces rendering of the #prefix and #suffix.
       // Without content, the wrappers are not rendered. Therefore, an empty
@@ -150,7 +150,7 @@ class FieldDescriptionsListForm extends FormBase {
       $rows = $this->buildRows($entities);
 
       // Form element that displays the result list.
-      $form['field_descriptions_list']['result'] = [
+      $form['descriptions_list']['result'] = [
         '#type' => 'markup',
         '#theme' => 'table',
         '#header' => $header,
@@ -171,7 +171,7 @@ class FieldDescriptionsListForm extends FormBase {
       '#ajax' => [
         'callback' => '::ajaxSubmit',
         // The ID of the <div/> into which search results should be inserted.
-        'wrapper' => 'set_field_descriptions_list_results_wrapper',
+        'wrapper' => 'set_descriptions_list_results_wrapper',
       ],
     ];
 
@@ -189,7 +189,7 @@ class FieldDescriptionsListForm extends FormBase {
    */
   public function ajaxSubmit(array &$form, FormStateInterface $form_state) {
     // Return the results list element of the form.
-    return $form['field_descriptions_list'];
+    return $form['descriptions_list'];
   }
 
   /**

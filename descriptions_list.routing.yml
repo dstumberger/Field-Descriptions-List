@@ -1,28 +1,28 @@
 field_descriptions.list:
   path: '/admin/reports/descriptions/field-descriptions'
   defaults:
-    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsListForm'
+    _form: '\Drupal\descriptions_list\Form\FieldDescriptionsListForm'
     _title: 'Field descriptions'
   requirements:
     _permission: 'administer site configuration'
 field_descriptions.import:
   path: '/admin/reports/descriptions/field-descriptions/import'
   defaults:
-    _form: '\Drupal\field_descriptions_list\Form\FieldDescriptionsImportForm'
+    _form: '\Drupal\descriptions_list\Form\FieldDescriptionsImportForm'
     _title: 'Field descriptions import'
   requirements:
     _permission: 'administer site configuration'
 entity_descriptions.list:
   path: '/admin/reports/descriptions/entity-descriptions'
   defaults:
-    _form: '\Drupal\field_descriptions_list\Form\EntityDescriptionsListForm'
+    _form: '\Drupal\descriptions_list\Form\EntityDescriptionsListForm'
     _title: 'Entity descriptions'
   requirements:
     _permission: 'administer site configuration'
 entity_descriptions.import:
   path: '/admin/reports/descriptions/entity-descriptions/import'
   defaults:
-    _form: '\Drupal\field_descriptions_list\Form\EntityDescriptionsImportForm'
+    _form: '\Drupal\descriptions_list\Form\EntityDescriptionsImportForm'
     _title: 'Entity descriptions import'
   requirements:
     _permission: 'administer site configuration'
